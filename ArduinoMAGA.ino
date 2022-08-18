@@ -3,6 +3,9 @@
 #include <URTouch.h>
 #include <Wire.h>
 
+String wifi_id[5];
+String wifi_pw[5];
+
 int MPU_Address = 0x68;
 int Resister = 0x41;
 int16_t AcX, AcY, AcZ;
@@ -47,6 +50,7 @@ String s2 = "";
 String s3 = "";
 String s4 = "";
 char API_DATA[17][60] = {0,};
+char WiFi_DATA[2][64] = {0,};
 String temp = "";
 String am_rate_data[5];// 환율(달러, 엔화, 유로, 위안)
 String jp_rate_data[5];
@@ -69,19 +73,14 @@ int x, y, y1 = 0;
 char stCurrent[40] = "";
 int stCurrentLen = 0;
 char stLast[40] = "";
-void setup() {
 
+void setup() {
   Serial.begin(9600);
-  /*Mega.begin(9600);
-  myGLCD.InitLCD();
-  myGLCD.clrScr();
-  myGLCD.setColor(0, 0, 0);
-  myGLCD.fillRect(0, 0, 319, 239);
-  myGLCD.setColor(255, 0, 0);
-  myGLCD.setBackColor(255, 255, 0);
-  myGLCD.setFont(BigFont);
-  myGLCD.print("API_DATA Loading", 30, 100, 0);
-  myGLCD.setBackColor(0, 0, 0);
+  Mega.begin(9600);
+
+  READwifi();
+  wifi_split();
+  
   READnodeMCU();
 
   am_rate_split();
@@ -91,15 +90,16 @@ void setup() {
   wea_split();
   covid_split();
   air_split();
-  
+
+  myGLCD.InitLCD();
+  myGLCD.clrScr();
+
   myTouch.InitTouch();
   myTouch.setPrecision(PREC_MEDIUM);
-  myGLCD.setColor(0, 0, 0);
-  myGLCD.fillRect(0, 0, 319, 239);
+
   myGLCD.setFont(SmallFont);
   myGLCD.setBackColor(0, 0, 0);
-  
-  delay(500);*/
+
   caliSensor();  //  초기 센서 캘리브레이션 함수 호출
   past = millis(); // past에 현재 시간 저장
 
@@ -107,10 +107,9 @@ void setup() {
   Wire.setClock(100000);
   init_MPU6050();
   //String num = "0";
-
 }
-int reverseY(int y)
-{
+
+int reverseY(int y){
   int temp = 0;
   if ((y >= 180) && (y <= 230))
     temp = y - 170;
@@ -121,6 +120,26 @@ int reverseY(int y)
   else if ((y >= 0) && (y <= 50))
     temp = y + 190;
   return temp;
+}
+void take_wifi(){
+  for (x=0; x<5; x++)
+  {
+    myGLCD.setColor(0, 0, 255);
+    myGLCD.fillRoundRect (10+(x*60), 10, 60+(x*60), 60);
+    myGLCD.setColor(255, 255, 255);
+    myGLCD.drawRoundRect (10+(x*60), 10, 60+(x*60), 60);
+    myGLCD.printNumI(x+1, 27+(x*60), 27);
+  }
+// Draw the center row of buttons
+  for (x=0; x<5; x++)
+  {
+    myGLCD.setColor(0, 0, 255);
+    myGLCD.fillRoundRect (10+(x*60), 70, 60+(x*60), 120);
+    myGLCD.setColor(255, 255, 255);
+    myGLCD.drawRoundRect (10+(x*60), 70, 60+(x*60), 120);
+    if (x<4)
+      myGLCD.printNumI(x+6, 27+(x*60), 87);
+  }
 }
 String Rotate(String str) {
   String sub = str;
@@ -165,16 +184,56 @@ String split(String str, String b) {
     return sub;
   }
 }
+void READwifi() {
+  bool c = true;
+  int b = 0;
+  char ch;
+  while (1) {
+    if (c) {
+      Serial.println((String(b)).c_str());
+      Mega.write((String(b)).c_str());
+      c = false;
+    }
+    while (Mega.available() > 0) {
+      //Serial.println(Mega.available());
+      ch = Mega.read();
+      //Serial.print((String)ch);
+      if (Mega.overflow()) {
+        Serial.println("SoftwareSerial overflow!");
+      }
+      if (serStringIndex == 0) {
+        serString = "";
+        serString += ch;
+        serStringIndex ++;
 
+      }
+      else  {
+        serString += ch;
+        serStringIndex ++;
+      }
+
+      if (serStringIndex != 0 && ch == ')') {
+        //화면 초기화
+        //tft lcd에 변수 띄우는 함수
+        Serial.println(serString);
+        strcpy(WiFi_DATA[b], serString.c_str());
+        Serial.println(WiFi_DATA[b]);
+        serStringIndex = 0;
+        c = true;
+        b++;
+      }
+    }
+
+    if (b >= 2) break;
+  }
+}
 void READnodeMCU() {
   bool c = true;
   int b = 0;
   char ch;
 
+
   while (1) {
-    
-    myGLCD.setColor(255, 255,0);
-    myGLCD.fillRect( 0, 200, (319/17)*b , 239);
     if (c) {
       Serial.println((String(b)).c_str());
       Mega.write((String(b)).c_str());
@@ -211,8 +270,7 @@ void READnodeMCU() {
         b++;
       }
     }
-    myGLCD.setColor(255, 0, 0);
-    myGLCD.print(String(String((100/17)*(b+3))+"%") , 130, 130, 0);
+
     if (b >= 17) break;
   }
 }
@@ -246,20 +304,20 @@ void loop() {
 
 
   //angleFiZ = angleGyZ;    // Z축은 자이로 센서만을 이용하여 구함.
- /* Serial.print("angleAcX:");
-    Serial.print(angleAcX);
-    Serial.print("\t angleAcY:");
-    Serial.println(angleAcY*10);
-  Serial.print("FiAcX:");
+  /*Serial.print("FiAcX:");
     Serial.print(FiAcX);
     Serial.print("\t FiAcY:");
-    Serial.println(FiAcY*10);*/
-  Serial.print("\t speedAcX:");
+    Serial.print(FiAcY);*/
+  /*Serial.print("FilteredX:");
+    Serial.print(angleFiX);
+    Serial.print("\t FilteredY:");
+    Serial.print(angleFiY);*/
+  /*Serial.print("\t speedAcX:");
     Serial.print(AcspeedAcX);
     Serial.print("\t speedAcY:");
-    Serial.println(AcspeedAcY);
+    Serial.println(AcspeedAcY);*/
 
- /* if (-45.0 < FiAcX && FiAcX < 45.0 && FiAcY < -45.0) {
+  if (-45.0 < FiAcX && FiAcX < 45.0 && FiAcY < -45.0) {
     //Serial.print("DOWN\r\n");
     result = 3;
   }
@@ -285,7 +343,7 @@ void loop() {
   }
 
   delaytime = now;
-  if ((AcspeedAcX < 10 || AcspeedAcY < 10) && (delaytime - delaytime2 >= 1000)) {
+  if ((AcspeedAcX < 1000 || AcspeedAcY < 1000) && (delaytime - delaytime2 >= 1000)) {
 
     if (per_result != result) {
       switch (result) {
@@ -329,7 +387,7 @@ void loop() {
             per_result = result;
             if (per_covid_touch == covid_touch) {
               per_covid_touch = (per_covid_touch + 1) % 2;
-            }        
+            }
             break;
           }
         case 4: {
@@ -386,15 +444,6 @@ void loop() {
           }
         case 5: {
             per_result = result;
-            myGLCD.setFont(BigFont);
-      myGLCD.setColor(255, 100, 100);
-      myGLCD.fillRoundRect (20, 20, 300, 220);
-      myGLCD.setColor(255, 50, 50);
-      myGLCD.drawRoundRect (20, 20, 300, 220);
-      
-      myGLCD.setBackColor(255, 100, 100);
-      myGLCD.setColor(255, 255, 255);
-      myGLCD.print("CLOCK" , 120, 40, 0);
             break;
           }
         default: {
@@ -415,24 +464,23 @@ void loop() {
       String Min = String((temp.toInt() + (now / 60000)) % 60);
       Clock_time = split(Clock_time, ":");
       String Sec = String((now / 1000) % 60);
-       
+
       String Clock_velue1 = String(Year + " : " + Month + " : " + Day);
-      String Clock_velue2 = String("("+Hour + " : ");
-      String Clock_velue3 = String(Min + " : ");
-      
-        String Clock_velue4 = String(Sec+")");
-     
-    
-      
+      String Clock_velue2 = String(Hour + " : " + Min + " : " + Sec);
       Serial.println("clock");
       /*  myGLCD.setColor(0, 0, 0);
-        myGLCD.fillRect(0, 0, 319, 239);
+        myGLCD.fillRect(0, 0, 319, 239);*/
+      myGLCD.setBackColor(255, 100, 100);
+      myGLCD.setFont(BigFont);
+      myGLCD.setColor(255, 100, 100);
+      myGLCD.fillRoundRect (20, 20, 300, 220);
+      myGLCD.setColor(255, 50, 50);
+      myGLCD.drawRoundRect (20, 20, 300, 220);
 
-      
-      myGLCD.print(Clock_velue1 , 50, 120, 0);
-      myGLCD.print(Clock_velue2 , 50, 160, 0);
-      myGLCD.print(Clock_velue3 , 150, 160, 0);
-      myGLCD.print(Clock_velue4 , 220, 160, 0);
+      myGLCD.setColor(255, 255, 255);
+      myGLCD.print("CLOCK" , 120, 30, 0);
+      myGLCD.print(Clock_velue1 , 50, 80, 0);
+      myGLCD.print(Clock_velue2 , 80, 160, 0);
     }
 
   }
@@ -483,7 +531,7 @@ void loop() {
         }
       }
     }
-  }*/
+  }
 }
 
 
@@ -495,13 +543,13 @@ void init_MPU6050() {
   Wire.endTransmission(true);
 
   Wire.beginTransmission(MPU_Address);
-  Wire.write(0x1C);//0x6B(PWR_MGMT_1) 가속도 값 가져오기
+  Wire.write(0x1C);//0x6B(PWR_MGMT_1) 인터럽트 사용 ON
   Wire.write(0x00); //0x6B(PWR_MGMT_1)
   Wire.endTransmission(true);
 
   Wire.beginTransmission(MPU_Address);
-  Wire.write(0x1A);//0x1A DLPF가 있는 레지스터
-  Wire.write(0x06); //DLPF(풀스택)
+  Wire.write(0x1A);//0x1A(PWR_MGMT_1) 레지스터를 선택
+  Wire.write(0x06); //0x6B(PWR_MGMT_1) 레지스터의 슬립모드 해제
   Wire.endTransmission(true);
 }
 
@@ -533,7 +581,24 @@ void caliSensor() {
   averAcX = sumAcX / 10;  averAcY = sumAcY / 10;  averAcZ = sumAcZ / 10;
 
 }
-
+void wifi_split() {
+  int i = 1;
+  String wifi = "";
+  wifi = split(Rotate(WiFi_DATA[0]), ":");
+  wifi_id[0] = temp;
+  while (i < 5) {
+    wifi = split(wifi, ":");
+    wifi_id[i] = temp;
+    i++
+  }
+  i = 1;
+  wifi = split(Rotate(WiFi_DATA[1]), ":");
+  while (i < 5) {
+    wifi = split(wifi, ":");
+    wifi_pw[i] = temp;
+    i++
+  }
+}
 void am_rate_split() {
   int i = 1;
   String R = "";
@@ -666,7 +731,7 @@ void covid_graph() {
     myGLCD.setFont(SmallFont);
     if (covid_touch == 0) {
       while (i < 6) {
-        covid_graph[i] = ((covid_data[i].toInt() / 100) * 5) / 2;
+        covid_graph[i] = (covid_data[i].toInt() / 100) * 3;
         i++;
       }
       myGLCD.drawLine( 20, 17 , 295 , 17);
