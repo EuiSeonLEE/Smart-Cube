@@ -1,5 +1,5 @@
 # Smart-Cube
-> 정육면체 **회전 감지** OpenAPI Data 모니터링 인터페이스
+> 정육면체 **회전 감지** OpenAPI Data 모니터링 시스템
 - <a href="https://youtu.be/aaSwo6hsAOw"><img src="https://img.shields.io/badge/발표영상-FF0000?style=flat-square&logo=YouTube&logoColor=white&link=https://youtu.be/aaSwo6hsAOw"/></a>
 - <a href="https://youtu.be/68f6nlIR7AI"><img src="https://img.shields.io/badge/시연영상-FF0000?style=flat-square&logo=YouTube&logoColor=white&link=https://youtu.be/68f6nlIR7AI"/></a>
 - [포스터](https://github.com/EuiSeonLEE/Smart-Cube/blob/023d9fe93757e26d146200c3eb431c80f5fb7b93/%5BSEP%5D%EC%A0%9C%EC%B6%9C%EC%9A%A9_%ED%8F%AC%EC%8A%A4%ED%84%B0.pdf)
