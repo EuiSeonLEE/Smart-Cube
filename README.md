@@ -7,4 +7,4 @@
 - [상장](https://github.com/EuiSeonLEE/Smart-Cube/blob/023d9fe93757e26d146200c3eb431c80f5fb7b93/%5B%EC%9D%80%EC%83%81%5D%EC%BA%A1%EC%8A%A4%ED%86%A4%EB%94%94%EC%9E%90%EC%9D%B8_%EC%A0%84%EC%9E%90.PDF)
 - Source Code
   - [Arduino MEGA](https://github.com/EuiSeonLEE/Smart-Cube/blob/main/ArduinoMAGA.ino)
-  - [ESP8266 NodeMCU](https://github.com/EuiSeonLEE/Smart-Cube/blob/e8864b9542044067cd097c0607ec1fdce0109e28/ESP8266NodeMCU.ino)
+  - [ESP8266 NodeMCU](https://github.com/EuiSeonLEE/Smart-Cube/blob/main/ESP8266NodeMCU.ino)
