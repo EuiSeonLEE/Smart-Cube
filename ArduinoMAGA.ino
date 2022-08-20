@@ -78,9 +78,6 @@ void setup() {
   Serial.begin(9600);
   Mega.begin(9600);
 
-  READwifi();
-  wifi_split();
-  
   READnodeMCU();
 
   am_rate_split();
@@ -121,36 +118,6 @@ int reverseY(int y){
     temp = y + 190;
   return temp;
 }
-void take_wifi(){
-  for (x=0; x<5; x++)
-  {
-    myGLCD.setColor(0, 0, 255);
-    myGLCD.fillRoundRect (10+(x*60), 10, 60+(x*60), 60);
-    myGLCD.setColor(255, 255, 255);
-    myGLCD.drawRoundRect (10+(x*60), 10, 60+(x*60), 60);
-    myGLCD.printNumI(x+1, 27+(x*60), 27);
-  }
-// Draw the center row of buttons
-  for (x=0; x<5; x++)
-  {
-    myGLCD.setColor(0, 0, 255);
-    myGLCD.fillRoundRect (10+(x*60), 70, 60+(x*60), 120);
-    myGLCD.setColor(255, 255, 255);
-    myGLCD.drawRoundRect (10+(x*60), 70, 60+(x*60), 120);
-    if (x<4)
-      myGLCD.printNumI(x+6, 27+(x*60), 87);
-  }
-}
-String Rotate(String str) {
-  String sub = str;
-  if (sub.substring(0, 1) == "(") {
-    a = sub.substring(1, 2).toInt();
-    //Serial.println(sub.substring(1,2).toInt());
-    sub = sub.substring(2);
-  }
-
-  return sub;
-}
 
 String split(String str, String b) {
   int index1 = 0, index2 = 0, index3 = 0;
@@ -184,49 +151,7 @@ String split(String str, String b) {
     return sub;
   }
 }
-void READwifi() {
-  bool c = true;
-  int b = 0;
-  char ch;
-  while (1) {
-    if (c) {
-      Serial.println((String(b)).c_str());
-      Mega.write((String(b)).c_str());
-      c = false;
-    }
-    while (Mega.available() > 0) {
-      //Serial.println(Mega.available());
-      ch = Mega.read();
-      //Serial.print((String)ch);
-      if (Mega.overflow()) {
-        Serial.println("SoftwareSerial overflow!");
-      }
-      if (serStringIndex == 0) {
-        serString = "";
-        serString += ch;
-        serStringIndex ++;
 
-      }
-      else  {
-        serString += ch;
-        serStringIndex ++;
-      }
-
-      if (serStringIndex != 0 && ch == ')') {
-        //화면 초기화
-        //tft lcd에 변수 띄우는 함수
-        Serial.println(serString);
-        strcpy(WiFi_DATA[b], serString.c_str());
-        Serial.println(WiFi_DATA[b]);
-        serStringIndex = 0;
-        c = true;
-        b++;
-      }
-    }
-
-    if (b >= 2) break;
-  }
-}
 void READnodeMCU() {
   bool c = true;
   int b = 0;
