@@ -8,3 +8,4 @@
 - Source Code
   - [Arduino MEGA](https://github.com/EuiSeonLEE/Smart-Cube/blob/main/ArduinoMAGA.ino)
   - [ESP8266 NodeMCU](https://github.com/EuiSeonLEE/Smart-Cube/blob/main/ESP8266NodeMCU.ino)
+![KakaoTalk_20211211_011907361](https://user-images.githubusercontent.com/84891209/186457631-af9b0578-5f24-47a1-aab9-1d267aa9d3bb.jpg)
